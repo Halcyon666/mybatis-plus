@@ -1,7 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:oracle:thin:@192.168.3.161:1521:jc
-    username: jc
-    password: 123456
-    driver-class-name: oracle.jdbc.driver.OracleDriver
-    maximum-pool-size: 30
