@@ -22,6 +22,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation group: 'com.baomidou', name: 'mybatis-plus-boot-starter', version: '3.2.0'
+    implementation group: 'com.baomidou', name: 'mybatis-plus-generator', version: '3.2.0'
+    implementation group: 'freemarker', name: 'freemarker', version: '2.3.9'
+
+
+    implementation group: 'com.github.ulisesbocchio', name: 'jasypt-spring-boot-starter', version: '3.0.3'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
     annotationProcessor 'org.projectlombok:lombok'
