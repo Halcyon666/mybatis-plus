@@ -1,3 +1,4 @@
+/*
 package com.whalefall541;
 
 import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
@@ -17,11 +18,13 @@ import java.util.Scanner;
 // 演示例子，执行 main 方法控制台输入模块表名回车自动生成对应项目目录中
 public class CodeGenerator {
 
-    /**
+    */
+/**
      * <p>
      * 读取控制台内容
      * </p>
-     */
+     *//*
+
     public static String scanner(String tip) {
         Scanner scanner = new Scanner(System.in);
         StringBuilder help = new StringBuilder();
@@ -88,7 +91,8 @@ public class CodeGenerator {
                         + "/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
             }
         });
-        /*
+        */
+/*
         cfg.setFileCreate(new IFileCreate() {
             @Override
             public boolean isCreate(ConfigBuilder configBuilder, FileType fileType, String filePath) {
@@ -102,7 +106,8 @@ public class CodeGenerator {
                 return true;
             }
         });
-        */
+        *//*
+
         cfg.setFileOutConfigList(focList);
         mpg.setCfg(cfg);
 
@@ -139,3 +144,4 @@ public class CodeGenerator {
 
 }
 
+*/

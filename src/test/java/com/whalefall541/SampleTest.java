@@ -1,6 +1,6 @@
 package com.whalefall541;
 
-import com.whalefall541.entity.Connect;
+import com.whalefall541.entity.connect.Connect;
 import com.whalefall541.entity.table.Users;
 import com.whalefall541.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
