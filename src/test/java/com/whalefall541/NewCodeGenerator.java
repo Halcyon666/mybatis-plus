@@ -44,7 +44,7 @@ public class NewCodeGenerator {
                                 .moduleName("system")
                                 .entity("po")
                                 .serviceImpl("service.impl")
-                                .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir")+"\\src\\main\\java")))
+                                .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir")+"\\src\\main\\resources\\mapper\\test")))
                 .strategyConfig(builder ->
                         builder.addInclude("table_a")
                                 .controllerBuilder()

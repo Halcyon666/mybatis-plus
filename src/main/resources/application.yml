@@ -5,7 +5,3 @@ spring:
     password: 123456
     driver-class-name: oracle.jdbc.driver.OracleDriver
     maximum-pool-size: 30
-
-logging:
-  level:
-    root: debug
