@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Collections;
 
@@ -43,6 +44,7 @@ public class NewCodeGenerator {
                         builder.parent("com.whalefall541.mybatisplus.samples.generator")
                                 .moduleName("system")
                                 .entity("po")
+                                .mapper("mapper")
                                 .serviceImpl("service.impl")
                                 .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir")+"\\src\\main\\resources\\mapper\\test")))
                 .strategyConfig(builder ->
@@ -69,6 +71,7 @@ public class NewCodeGenerator {
 
                                 .mapperBuilder()
                                 .enableFileOverride()
+                                .mapperAnnotation(Mapper.class)
 
                 ).templateEngine(new FreemarkerTemplateEngine()).execute();
     }
