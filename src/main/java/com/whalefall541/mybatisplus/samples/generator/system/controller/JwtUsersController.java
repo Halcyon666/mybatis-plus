@@ -5,14 +5,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- * 用户表 前端控制器
+ *  前端控制器
  * </p>
  *
  * @author xx
- * @since 2024-04-26
+ * @since 2024-06-29
  */
 @RestController
-@RequestMapping("/system/tableAPO")
-public class TableAController {
+@RequestMapping("/system/jwtUsersPO")
+public class JwtUsersController {
 
 }

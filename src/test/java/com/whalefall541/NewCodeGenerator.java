@@ -48,7 +48,7 @@ public class NewCodeGenerator {
                                 .serviceImpl("service.impl")
                                 .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir")+"\\src\\main\\resources\\mapper\\test")))
                 .strategyConfig(builder ->
-                        builder.addInclude("table_a")
+                        builder.addInclude("JWT_USERS")
                                 .controllerBuilder()
                                 .enableFileOverride()
                                 .enableRestStyle()
@@ -59,7 +59,6 @@ public class NewCodeGenerator {
                                 .enableLombok()
                                 .disableSerialVersionUID()
                                 .enableTableFieldAnnotation()
-                                .enableActiveRecord()
                                 .enableFileOverride()
 //                                .addTableFills(new Column("timecolunmn", FieldFill.INSERT))
                                 .formatFileName("%sPO")
