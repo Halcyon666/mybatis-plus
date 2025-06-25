@@ -8,7 +8,6 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 
 //@EnableEncryptableProperties
-//@SpringBootApplication
 public class HwjpjApplication extends SpringBootServletInitializer {
     //  注册这两个bean,加密属性检测类
     @Bean(name = "encryptablePropertyDetector")
