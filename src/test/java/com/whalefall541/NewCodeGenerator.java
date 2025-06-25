@@ -1,9 +1,11 @@
 package com.whalefall541;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
+import com.baomidou.mybatisplus.generator.fill.Column;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Collections;
@@ -48,7 +50,7 @@ public class NewCodeGenerator {
                                 .serviceImpl("service.impl")
                                 .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir")+"\\src\\main\\resources\\mapper\\test")))
                 .strategyConfig(builder ->
-                        builder.addInclude("JWT_USERS")
+                        builder.addInclude("CODE_ENTITY")
                                 .controllerBuilder()
                                 .enableFileOverride()
                                 .enableRestStyle()
@@ -60,7 +62,7 @@ public class NewCodeGenerator {
                                 .disableSerialVersionUID()
                                 .enableTableFieldAnnotation()
                                 .enableFileOverride()
-//                                .addTableFills(new Column("timecolunmn", FieldFill.INSERT))
+                                .addTableFills(new Column("updateTime", FieldFill.INSERT_UPDATE))
                                 .formatFileName("%sPO")
 
                                 .serviceBuilder()
