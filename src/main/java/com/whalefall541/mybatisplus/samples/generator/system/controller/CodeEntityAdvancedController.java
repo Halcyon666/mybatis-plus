@@ -1,10 +1,13 @@
 package com.whalefall541.mybatisplus.samples.generator.system.controller;
 
+import com.whalefall541.config.DataSourceContextHolder;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
 import com.whalefall541.mybatisplus.samples.generator.system.service.impl.CodeEntityAdvancedServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -19,23 +22,34 @@ import java.util.List;
 @RequestMapping
 public class CodeEntityAdvancedController {
 
-    @Autowired
+    @Resource
     private CodeEntityAdvancedServiceImpl advancedService;
 
     /**
      * 使用注解从主数据源查询
      */
-    @GetMapping("/master/annotation")
+    @GetMapping("/master/handleSet")
     public List<CodeEntityPO> selectFromMasterWithAnnotation() {
-        return advancedService.selectFromMasterWithAnnotation();
+        try {
+            DataSourceContextHolder.setDataSource("master");
+            return advancedService.selectFromMasterWithAnnotation();
+        } finally {
+            DataSourceContextHolder.clearDataSource();
+        }
     }
 
     /**
      * 使用注解从从数据源查询
      */
-    @GetMapping("/slave/annotation")
+    @GetMapping("/slave/handleSet")
     public List<CodeEntityPO> selectFromSlaveWithAnnotation() {
-        return advancedService.selectFromSlaveWithAnnotation();
+        try {
+            DataSourceContextHolder.setDataSource("slave");
+
+            return advancedService.selectFromSlaveWithAnnotation();
+        } finally {
+            DataSourceContextHolder.clearDataSource();
+        }
     }
 
     /**
@@ -54,27 +68,4 @@ public class CodeEntityAdvancedController {
         return advancedService.selectFromSlaveWithEnum();
     }
 
-    /**
-     * 保存到主库
-     */
-    @PostMapping("/save/master")
-    public boolean saveToMaster(@RequestBody CodeEntityPO entity) {
-        return advancedService.saveToMaster(entity);
-    }
-
-    /**
-     * 保存到从库
-     */
-    @PostMapping("/save/slave")
-    public boolean saveToSlave(@RequestBody CodeEntityPO entity) {
-        return advancedService.saveToSlave(entity);
-    }
-
-    /**
-     * 批量操作演示
-     */
-    @PostMapping("/batch")
-    public String batchOperation(@RequestBody CodeEntityPO entity) {
-        return advancedService.batchOperation(entity);
-    }
 }
