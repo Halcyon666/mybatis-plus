@@ -40,9 +40,10 @@ public class SimpleDataSourceConfig {
 
     /**
      * 动态数据源
+     * 方法一
      */
-    @Bean
     @Primary
+    @Bean
     public DataSource dynamicDataSource() {
         SimpleDynamicDataSource dynamicDataSource = new SimpleDynamicDataSource();
 
