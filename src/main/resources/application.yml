@@ -1,30 +1,21 @@
 spring:
   datasource:
     dynamic:
-      primary: master # 设置默认的数据源或者数据源组，默认值即为master
-      strict: false # 严格匹配数据源，默认false. true未匹配到指定数据源时抛异常，false使用默认数据源
+      primary: master
       datasource:
         master:
-          url: jdbc:oracle:thin:@192.168.3.161:1521:jc
+          type: org.apache.tomcat.jdbc.pool.DataSource
+          driver-class-name: oracle.jdbc.OracleDriver
+          jdbc-url: jdbc:oracle:thin:@192.168.3.161:1521:jc
           username: jc
           password: 123456
-          driver-class-name: oracle.jdbc.driver.OracleDriver
-          hikari:
-            maximum-pool-size: 5
         slave:
-          url: jdbc:mysql://192.168.3.163:3306/ai-dream?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true
+          type: org.apache.tomcat.jdbc.pool.DataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          jdbc-url: jdbc:mysql://192.168.3.163:3306/ai-dream
           username: root
           password: root
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          hikari:
-            maximum-pool-size: 5
 
-
-  # 添加以下配置以确保Spring Boot正确识别数据源
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-
-# MyBatis-Plus配置
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   type-aliases-package: com.whalefall541.mybatisplus.samples.generator.system.po
