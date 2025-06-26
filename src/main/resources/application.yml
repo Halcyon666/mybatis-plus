@@ -4,15 +4,13 @@ spring:
       primary: master
       datasource:
         master:
-          type: org.apache.tomcat.jdbc.pool.DataSource
           driver-class-name: oracle.jdbc.OracleDriver
-          jdbc-url: jdbc:oracle:thin:@192.168.3.161:1521:jc
+          url: jdbc:oracle:thin:@192.168.3.161:1521:jc
           username: jc
           password: 123456
         slave:
-          type: org.apache.tomcat.jdbc.pool.DataSource
           driver-class-name: com.mysql.cj.jdbc.Driver
-          jdbc-url: jdbc:mysql://192.168.3.163:3306/ai-dream
+          url: jdbc:mysql://192.168.3.163:3306/ai-dream
           username: root
           password: root
 
@@ -21,4 +19,4 @@ mybatis-plus:
   type-aliases-package: com.whalefall541.mybatisplus.samples.generator.system.po
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

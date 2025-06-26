@@ -1,6 +1,5 @@
 package com.whalefall541.config;
 
-import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +25,7 @@ public class SimpleDataSourceConfig {
     @Bean
     @ConfigurationProperties("spring.datasource.dynamic.datasource.master")
     public DataSource masterDataSource() {
-        return new HikariDataSource();
+        return applyCommonPoolConfig(new org.apache.tomcat.jdbc.pool.DataSource(), "SELECT 1 FROM DUAL");
     }
 
     /**
@@ -35,7 +34,32 @@ public class SimpleDataSourceConfig {
     @Bean
     @ConfigurationProperties("spring.datasource.dynamic.datasource.slave")
     public DataSource slaveDataSource() {
-        return new HikariDataSource();
+
+        return applyCommonPoolConfig(new org.apache.tomcat.jdbc.pool.DataSource(), "SELECT 1");
+    }
+
+    private org.apache.tomcat.jdbc.pool.DataSource applyCommonPoolConfig(org.apache.tomcat.jdbc.pool.DataSource ds, String validationQuery) {
+        ds.setInitialSize(5);
+        ds.setMaxActive(30);
+        ds.setMinIdle(3);
+        ds.setMaxIdle(10);
+        ds.setMaxWait(30000);
+
+        ds.setTestOnBorrow(true);
+        ds.setTestWhileIdle(true); // 建议开启，避免闲置连接意外失效
+        ds.setValidationQuery(validationQuery);
+        ds.setValidationQueryTimeout(5); // 秒
+
+        ds.setTimeBetweenEvictionRunsMillis(30000); // 30秒扫描一次空闲连接
+        ds.setMinEvictableIdleTimeMillis(60000); // 60秒空闲就回收
+
+        ds.setRemoveAbandoned(true);
+        ds.setRemoveAbandonedTimeout(60); // 60秒未关闭被认为泄漏
+        ds.setLogAbandoned(true);
+
+        ds.setValidationInterval(30000); // 最小间隔30秒执行一次验证
+
+        return ds;
     }
 
     /**
