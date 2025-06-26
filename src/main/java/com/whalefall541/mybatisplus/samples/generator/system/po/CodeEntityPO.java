@@ -1,15 +1,17 @@
 package com.whalefall541.mybatisplus.samples.generator.system.po;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author xx
@@ -20,7 +22,7 @@ import lombok.Setter;
 @TableName("CODE_ENTITY")
 public class CodeEntityPO {
 
-    @TableField("USERNAME")
+    @TableId
     private String username;
 
     @TableField("CODE")
