@@ -2,7 +2,6 @@ package com.whalefall541.config;
 
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.quartz.QuartzDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -20,21 +19,11 @@ import javax.sql.DataSource;
 public class QuartzConfig {
 
     /**
-     * 专门为Quartz配置的数据源
-     * 使用@QuartzDataSource注解标识这是Quartz专用的数据源
-     */
-    @Bean
-    @QuartzDataSource
-    public DataSource quartzDataSource(@Qualifier("slaveDataSource") DataSource dataSource) {
-        return dataSource;
-    }
-
-    /**
      * 配置调度器工厂Bean
      * 明确设置数据源和属性
      */
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(@QuartzDataSource @Qualifier("quartzDataSource") DataSource dataSource) {
+    public SchedulerFactoryBean schedulerFactoryBean(@Qualifier("slaveDataSource") DataSource dataSource) {
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
 
         // 设置数据源

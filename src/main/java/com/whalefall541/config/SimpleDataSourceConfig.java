@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Map;
  * @since 2024-07-10
  */
 @Configuration
+@Order(-10)
 public class SimpleDataSourceConfig {
 
     /**
