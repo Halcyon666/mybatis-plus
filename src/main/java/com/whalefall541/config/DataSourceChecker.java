@@ -1,6 +1,7 @@
 package com.whalefall541.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -27,4 +28,19 @@ public class DataSourceChecker implements CommandLineRunner {
             }
         });
     }
+
+
+    @SuppressWarnings("all")
+    public void printTomcatDataSourceCredentials(DataSource ds) {
+        if (ds instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+            org.apache.tomcat.jdbc.pool.DataSource dataSource = (org.apache.tomcat.jdbc.pool.DataSource) ds;
+            PoolConfiguration config = dataSource.getPoolProperties();
+            String username = config.getUsername();
+            String password = config.getPassword(); // ⚠️调试用
+
+            log.info("✅ 数据源用户名: {}", username);
+            log.info("✅ 数据源密码: {}", password != null ? password : "(null)");
+        }
+    }
+
 }
