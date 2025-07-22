@@ -4,4 +4,21 @@ spring:
     username: jc
     password: 123456
     driver-class-name: oracle.jdbc.driver.OracleDriver
-    maximum-pool-size: 30
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+
+mybatis-plus:
+  # Mapper XML location (only if you have custom XML files)
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # Entity scan path for type aliases
+  type-aliases-package: com.whalefall541.mybatisplus.samples.generator.system.po
+  configuration:
+    # Enable automatic camelCase mapping
+    map-underscore-to-camel-case: true
+    # Cache enabled
+    cache-enabled: false
+    # Enable SQL logging (disable in production)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

@@ -48,7 +48,7 @@ public class NewCodeGenerator {
                                 .serviceImpl("service.impl")
                                 .pathInfo(Collections.singletonMap(OutputFile.xml, System.getProperty("user.dir")+"\\src\\main\\resources\\mapper\\test")))
                 .strategyConfig(builder ->
-                        builder.addInclude("JWT_USERS")
+                        builder.addInclude("CODE_ENTITY")
                                 .controllerBuilder()
                                 .enableFileOverride()
                                 .enableRestStyle()
