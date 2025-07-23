@@ -18,9 +18,8 @@ public class CodeQueryExecutor {
         this.executor = Executors.newFixedThreadPool(threadPoolSize);
     }
 
-    public Map<String, CodeEntityPO> queryUsers(Map<String, CodeEntityPO> userMap) throws ExecutionException {
+    public CompletableFuture<Map<String, CodeEntityPO>> queryUsersAsync(Map<String, CodeEntityPO> userMap) {
         Map<String, CodeEntityPO> resultMap = Collections.synchronizedMap(new HashMap<>());
-
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (String userId : userMap.keySet()) {
@@ -32,27 +31,18 @@ public class CodeQueryExecutor {
                         resultMap.put(userId, user);
                     }
                 } catch (Exception e) {
-                    // 包装异常，包含具体 userId
-                    throw new CompletionException(new RuntimeException("查询失败 userId=" + userId, e));
+                    // 包装为 CompletionException，让链可感知异常
+                    throw new CompletionException("查询失败 userId=" + userId, e);
                 }
             }, executor);
             futures.add(future);
         }
 
-        // 等待所有任务完成（失败也立即抛出）
-        CompletableFuture<Void> allTasks = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-
-        try {
-            allTasks.join(); // 会传播其中一个任务的异常
-        } catch (CompletionException ex) {
-            Throwable cause = ex.getCause();
-            // 直接透传已包装过的异常
-            throw new ExecutionException("并发查询失败：" + cause.getMessage(), cause);
-        }
-
-        return resultMap;
+        // allOf 返回一个 CompletableFuture<Void>
+        return CompletableFuture
+                .allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> resultMap);
     }
-
 
     public void shutdown() {
         executor.shutdown();

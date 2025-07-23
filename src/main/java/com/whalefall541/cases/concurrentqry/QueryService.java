@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,12 +34,12 @@ public class QueryService {
     public void doCodeQuery() {
         try {
             codeQuery();
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             log.error("并发查询code失败", e);
         }
     }
 
-    public void codeQuery() throws ExecutionException {
+    public void codeQuery() {
         CodeQueryExecutor executor = new CodeQueryExecutor(sqlSessionFactory, 3);
 
         List<String> userIds = Arrays.asList("JACK0",
@@ -57,8 +57,18 @@ public class QueryService {
                 ));
 
         try {
-            Map<String, CodeEntityPO> result = executor.queryUsers(userMap);
-            result.forEach((id, user) -> log.info("{}: {}", id, user));
+            executor.queryUsersAsync(userMap)
+                    .handle((resultMap, ex) -> {
+                        if (ex != null) {
+                            throw new CompletionException(ex);
+                        }
+                        resultMap.forEach((id, user) -> log.info("{}: {}", id, user));
+                        return resultMap;
+                        // .join() 等待任务完成，异常抛出
+                        // 如果不调用，线程池会提前关闭，导致 com.whalefall541.cases.concurrentqry.QueryService.doCodeQuery
+                        // 捕获不到异常
+                    }).join();
+
         } finally {
             executor.shutdown();
         }
