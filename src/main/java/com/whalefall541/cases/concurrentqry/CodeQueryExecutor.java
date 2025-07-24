@@ -2,6 +2,7 @@ package com.whalefall541.cases.concurrentqry;
 
 import com.whalefall541.mybatisplus.samples.generator.system.mapper.CodeEntityMapper;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
+import lombok.Getter;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.*;
 public class CodeQueryExecutor {
 
     private final SqlSessionFactory sqlSessionFactory;
+    @Getter
     private final ExecutorService executor;
 
     public CodeQueryExecutor(SqlSessionFactory sqlSessionFactory, int threadPoolSize) {
@@ -44,7 +46,4 @@ public class CodeQueryExecutor {
                 .thenApply(v -> resultMap);
     }
 
-    public void shutdown() {
-        executor.shutdown();
-    }
 }

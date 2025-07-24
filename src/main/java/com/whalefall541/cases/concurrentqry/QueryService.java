@@ -15,6 +15,8 @@ import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.whalefall541.cases.concurrentqry.AsyncTaskExecutor.shutdown;
+
 /**
  * @author Halcyon
  * @date 2025/7/22 23:01
@@ -40,7 +42,7 @@ public class QueryService {
     }
 
     public void codeQuery() {
-        CodeQueryExecutor executor = new CodeQueryExecutor(sqlSessionFactory, 3);
+        CodeQueryExecutor queryExecutor = new CodeQueryExecutor(sqlSessionFactory, 3);
 
         List<String> userIds = Arrays.asList("JACK0",
                 "JACK1",
@@ -57,7 +59,7 @@ public class QueryService {
                 ));
 
         try {
-            executor.queryUsersAsync(userMap)
+            queryExecutor.queryUsersAsync(userMap)
                     .handle((resultMap, ex) -> {
                         if (ex != null) {
                             throw new CompletionException(ex);
@@ -70,7 +72,7 @@ public class QueryService {
                     }).join();
 
         } finally {
-            executor.shutdown();
+            shutdown(queryExecutor.getExecutor());
         }
     }
 }
