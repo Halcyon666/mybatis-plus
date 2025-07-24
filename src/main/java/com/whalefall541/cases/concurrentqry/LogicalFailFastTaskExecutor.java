@@ -23,13 +23,26 @@ public class LogicalFailFastTaskExecutor implements AutoCloseable {
         this.executor = Executors.newFixedThreadPool(threadCount);
     }
 
+    public static void shutdown(ExecutorService executor) {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     /**
      * 失败日志会打印出 threadCount 条
-     * @param inputs 输入List P
+     *
+     * @param inputs       输入List P
      * @param taskFunction 执行函数
-     * @return CompletableFuture<List<R>>
-     * @param <P> 执行函数 入参
-     * @param <R> 执行函数 出参
+     * @param <P>          执行函数 入参
+     * @param <R>          执行函数 出参
+     * @return CompletableFuture<List < R>>
      */
     public <P, R> CompletableFuture<List<R>> executeAsyncTasks(List<P> inputs, Function<P, R> taskFunction) {
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);
@@ -57,18 +70,6 @@ public class LogicalFailFastTaskExecutor implements AutoCloseable {
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList())
                 );
-    }
-
-    public static void shutdown(ExecutorService executor) {
-        executor.shutdown();
-        try {
-            if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
-                executor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executor.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
     }
 
     @Override

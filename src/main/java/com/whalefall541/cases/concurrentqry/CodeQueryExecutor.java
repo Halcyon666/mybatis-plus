@@ -7,8 +7,15 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+/**
+ * v1 直接把行为封装到工具类里面<br/>
+ * 一旦某个线程抛出异常，其它未完成的任务基本就不会继续（因为异常在 runAsync 中传播得更快），所以只打印一个失败日志。
+ */
 public class CodeQueryExecutor {
 
     private final SqlSessionFactory sqlSessionFactory;

@@ -37,6 +37,25 @@ public class QueryService {
     static final String LOG_PATTERN = "{}: {}";
     private final SqlSessionFactory sqlSessionFactory;
     private CodeEntityServiceImpl codeEntityService;
+
+    private static Map<String, CodeEntityPO> getSourceMap() {
+        return LIST.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        obj -> new CodeEntityPO() {
+                        }
+                ));
+    }
+
+    private static List<CodeEntityPO> getPos() {
+        return LIST.stream()
+                .map(s -> {
+                    CodeEntityPO codeEntityPO = new CodeEntityPO();
+                    codeEntityPO.setUsername(s);
+                    return codeEntityPO;
+                }).collect(Collectors.toList());
+    }
+
     @Bean
     public CommandLineRunner commandLineRunner() {
         return args -> doCodeQuery();
@@ -72,24 +91,6 @@ public class QueryService {
         } finally {
             shutdown(queryExecutor.getExecutor());
         }
-    }
-
-    private static Map<String, CodeEntityPO> getSourceMap() {
-        return LIST.stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        obj -> new CodeEntityPO() {
-                        }
-                ));
-    }
-
-    private static List<CodeEntityPO> getPos() {
-         return LIST.stream()
-                .map(s -> {
-                    CodeEntityPO codeEntityPO = new CodeEntityPO();
-                    codeEntityPO.setUsername(s);
-                    return codeEntityPO;
-                }).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unused")
