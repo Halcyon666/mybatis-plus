@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 public class CodeEntityPO {
 
     @TableId("USERNAME")
+//    @TableField("USERNAME")
     private String username;
 
     @TableField("CODE")
