@@ -4,6 +4,7 @@ import com.whalefall541.cases.concurrentqry.v1.CodeQueryExecutor;
 import com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor;
 import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor;
 import com.whalefall541.cases.concurrentqry.v4.InterruptibleTaskWrapper;
+import com.whalefall541.cases.concurrentqry.v5.FailFastAsyncExecutorV5;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
 import com.whalefall541.mybatisplus.samples.generator.system.service.impl.CodeEntityServiceImpl;
 import lombok.AllArgsConstructor;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,7 @@ public class QueryService {
     static final String LOG_PATTERN = "{}: {}";
     private final SqlSessionFactory sqlSessionFactory;
     private CodeEntityServiceImpl codeEntityService;
+    private final Executor globalExecutor;
 
     private static Map<String, CodeEntityPO> getSourceMap() {
         return LIST.stream()
@@ -67,14 +71,14 @@ public class QueryService {
 
     public void doCodeQuery() {
         try {
-            codeQuery3();
+            queryCodesWithFailFast5();
         } catch (Exception e) {
             log.error("并发查询code失败", e);
         }
     }
 
     @SuppressWarnings("unused")
-    public void codeQuery() {
+    public void codeQuery1() {
         CodeQueryExecutor queryExecutor = new CodeQueryExecutor(sqlSessionFactory, 3);
 
         Map<String, CodeEntityPO> userMap = getSourceMap();
@@ -98,7 +102,7 @@ public class QueryService {
     }
 
     @SuppressWarnings("unused")
-    public void codeQuery1() {
+    public void codeQuery2() {
         List<CodeEntityPO> poList = getPos();
         try (LogicalFailFastTaskExecutor asyncTaskExecutor = new LogicalFailFastTaskExecutor(3)) {
             asyncTaskExecutor.executeAsyncTasks(poList, po -> codeEntityService.getById(po.getUsername()))
@@ -114,7 +118,7 @@ public class QueryService {
 
     // real FailFast
     @SuppressWarnings("unused")
-    public void codeQuery2() {
+    public void codeQuery3() {
         List<CodeEntityPO> poList = getPos();
         try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
@@ -130,7 +134,8 @@ public class QueryService {
 
 
     // 响应中断
-    public void codeQuery3() {
+    @SuppressWarnings("unused")
+    public void codeQuery4() {
         // 如果你的 taskFunction 内部有循环或长耗时操作，最好把 checkInterrupted() 放在循环体里多次调用；
         Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
                 .wrap(s -> codeEntityService.getById(s));
@@ -145,6 +150,21 @@ public class QueryService {
                         return list;
                     }).join();
         }
+    }
+
+    // 使用共享线程池
+    public void queryCodesWithFailFast5() {
+        Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
+                .wrap(s -> codeEntityService.getById(s));
+
+        FailFastAsyncExecutorV5 executor = new FailFastAsyncExecutorV5(globalExecutor);
+        CompletableFuture<List<CodeEntityPO>> future = executor.executeFailFast(
+                LIST,
+                interruptibleTask
+        );
+
+        List<CodeEntityPO> results = future.join();
+        log.info("查询完成，成功结果 {} 条", results.size());
     }
 
 }
