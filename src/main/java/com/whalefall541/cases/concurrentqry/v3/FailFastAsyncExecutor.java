@@ -1,4 +1,4 @@
-package com.whalefall541.cases.concurrentqry;
+package com.whalefall541.cases.concurrentqry.v3;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,11 +9,16 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.whalefall541.cases.concurrentqry.LogicalFailFastTaskExecutor.shutdown;
+import static com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor.shutdown;
 
 /**
  * Cancel快速失败
  * Recommend version
+ * <p>
+ * 你的 FailFastAsyncExecutor 实现了 AutoCloseable，用完后关闭线程池是个好习惯，避免线程泄漏。
+ * 如果是高并发频繁调用，考虑线程池复用或者改为共享线程池，避免频繁创建销毁。
+ * <p>
+ * 一个支持中断响应的任务包装，或者帮你写个完整示例演示异常传播和取消
  */
 @Slf4j
 public class FailFastAsyncExecutor implements AutoCloseable {

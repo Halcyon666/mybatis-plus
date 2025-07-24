@@ -1,4 +1,4 @@
-package com.whalefall541.cases.concurrentqry;
+package com.whalefall541.cases.concurrentqry.v1;
 
 import com.whalefall541.mybatisplus.samples.generator.system.mapper.CodeEntityMapper;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
