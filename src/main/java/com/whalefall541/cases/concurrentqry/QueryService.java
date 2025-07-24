@@ -34,6 +34,7 @@ public class QueryService {
             "JACK4",
             "JACK5",
             "JACK6");
+    static final String LOG_PATTERN = "{}: {}";
     private final SqlSessionFactory sqlSessionFactory;
     private CodeEntityServiceImpl codeEntityService;
     @Bean
@@ -43,13 +44,13 @@ public class QueryService {
 
     public void doCodeQuery() {
         try {
-            codeQuery();
+            codeQuery2();
         } catch (Exception e) {
             log.error("并发查询code失败", e);
         }
     }
 
-    // v1 直接把行为封装到工具类里面
+    @SuppressWarnings("unused")
     public void codeQuery() {
         CodeQueryExecutor queryExecutor = new CodeQueryExecutor(sqlSessionFactory, 3);
 
@@ -61,7 +62,7 @@ public class QueryService {
                         if (ex != null) {
                             throw new CompletionException(ex);
                         }
-                        resultMap.forEach((id, user) -> log.info("{}: {}", id, user));
+                        resultMap.forEach((id, user) -> log.info(LOG_PATTERN, id, user));
                         return resultMap;
                         // .join() 等待任务完成，异常抛出
                         // 如果不调用，线程池会提前关闭，导致 com.whalefall541.cases.concurrentqry.QueryService.doCodeQuery
@@ -100,7 +101,24 @@ public class QueryService {
                         if (ex != null) {
                             throw new CompletionException(ex);
                         }
-                        log.info("{}: {}", list.size(), list);
+                        log.info(LOG_PATTERN, list.size(), list);
+                        return list;
+                        // .join() 等待任务完成，异常抛出
+                        // 如果不调用，线程池会提前关闭，导致 com.whalefall541.cases.concurrentqry.QueryService.doCodeQuery
+                        // 捕获不到异常
+                    }).join();
+        }
+    }
+
+    public void codeQuery2() {
+        List<CodeEntityPO> poList = getPos();
+        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
+            asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
+                    .handle((list, ex) -> {
+                        if (ex != null) {
+                            throw new CompletionException(ex);
+                        }
+                        log.info(LOG_PATTERN, list.size(), list);
                         return list;
                         // .join() 等待任务完成，异常抛出
                         // 如果不调用，线程池会提前关闭，导致 com.whalefall541.cases.concurrentqry.QueryService.doCodeQuery
