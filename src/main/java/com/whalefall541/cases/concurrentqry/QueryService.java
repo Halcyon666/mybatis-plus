@@ -13,6 +13,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -71,7 +73,7 @@ public class QueryService {
 
     public void doCodeQuery() {
         try {
-            queryCodesWithFailFast5();
+            codeQueryWithTransactional2();
         } catch (Exception e) {
             log.error("并发查询code失败", e);
         }
@@ -153,6 +155,7 @@ public class QueryService {
     }
 
     // 使用共享线程池
+    @SuppressWarnings("unused")
     public void queryCodesWithFailFast5() {
         Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
                 .wrap(s -> codeEntityService.getById(s));
@@ -167,4 +170,35 @@ public class QueryService {
         log.info("查询完成，成功结果 {} 条", results.size());
     }
 
+
+    @SuppressWarnings("unused")
+    public void codeQueryWithTransactional1() {
+        List<CodeEntityPO> poList = getPos();
+        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
+            asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getByIdMine(po.getUsername()))
+                    .handle((list, ex) -> {
+                        if (ex != null) {
+                            throw new CompletionException(ex);
+                        }
+                        log.info(LOG_PATTERN, list.size(), list);
+                        return list;
+                    }).join();
+        }
+    }
+
+    private final PlatformTransactionManager transactionManager;
+
+    public void codeQueryWithTransactional2() {
+        TransactionTemplate template = new TransactionTemplate(transactionManager);
+        FailFastAsyncExecutorV5 executor = new FailFastAsyncExecutorV5(globalExecutor);
+        executor.executeFailFast(LIST, id -> template.execute(
+                        status -> codeEntityService.getByIdMine(id)))
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("任务执行失败：{}", ex.getMessage(), ex);
+                    } else {
+                        log.info("任务成功结果: {}", result);
+                    }
+                });
+    }
 }

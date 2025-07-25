@@ -37,6 +37,7 @@ public class FailFastAsyncExecutor implements AutoCloseable {
      * @param taskFunction 任务处理函数，输入 P 返回 R
      * @return 一个异步 CompletableFuture，成功返回结果列表，失败抛出第一个异常
      */
+    @SuppressWarnings("all")
     public <P, R> CompletableFuture<List<R>> executeFailFast(List<P> inputs, Function<P, R> taskFunction) {
         List<CompletableFuture<R>> futures = inputs.stream()
                 .map(input -> CompletableFuture.supplyAsync(() -> taskFunction.apply(input), executor))
