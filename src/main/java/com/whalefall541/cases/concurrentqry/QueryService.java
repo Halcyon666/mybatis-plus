@@ -5,8 +5,11 @@ import com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor;
 import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor;
 import com.whalefall541.cases.concurrentqry.v4.InterruptibleTaskWrapper;
 import com.whalefall541.cases.concurrentqry.v5.FailFastAsyncExecutorV5;
+import com.whalefall541.cases.concurrentqry.v6.Resilience4jExecutor;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
 import com.whalefall541.mybatisplus.samples.generator.system.service.impl.CodeEntityServiceImpl;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -73,7 +76,7 @@ public class QueryService {
 
     public void doCodeQuery() {
         try {
-            codeQueryWithTransactional2();
+            resilience4jCall();
         } catch (Exception e) {
             log.error("并发查询code失败", e);
         }
@@ -188,6 +191,7 @@ public class QueryService {
 
     private final PlatformTransactionManager transactionManager;
 
+    @SuppressWarnings("unused")
     public void codeQueryWithTransactional2() {
         TransactionTemplate template = new TransactionTemplate(transactionManager);
         FailFastAsyncExecutorV5 executor = new FailFastAsyncExecutorV5(globalExecutor);
@@ -197,8 +201,60 @@ public class QueryService {
                     if (ex != null) {
                         log.error("任务执行失败：{}", ex.getMessage(), ex);
                     } else {
-                        log.info("任务成功结果: {}", result);
+                        extracted(result);
                     }
                 });
     }
+
+    private final Resilience4jExecutor resilience4jExecutor;
+
+    // 正常版本
+    @SuppressWarnings("all")
+    public void resilience4jCall() {
+        resilience4jExecutor.execute(LIST,
+                id -> codeEntityService.getById(id),
+                "remoteServiceRetry",
+                "remoteServiceCB",
+                "remoteServiceLimiter"
+        ).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("任务执行失败：{}", ex.getMessage(), ex);
+            } else {
+                extracted(result);
+            }
+        });
+
+    }
+
+    private static void extracted(List<CodeEntityPO> result) {
+        log.info("任务成功结果: {}", result);
+    }
+
+    // 限流拒绝
+    @SuppressWarnings("all")
+    public void resilience4jCallRequestNotPermitted() {
+
+        resilience4jExecutor.execute(
+                LIST,
+                id -> codeEntityService.getById(id),
+                "remoteServiceRetry",
+                "remoteServiceCB",
+                "testLimiter"
+        ).whenComplete((result, ex) -> {
+            if (ex != null) {
+                Throwable cause = ex.getCause();
+                if (cause instanceof RequestNotPermitted) {
+                    log.warn("限流拒绝: {}", cause.getMessage());
+                } else if (cause instanceof CallNotPermittedException) {
+                    log.warn("熔断器打开: {}", cause.getMessage());
+                } else {
+                    log.error("任务异常", cause);
+                }
+            } else {
+                log.info("执行成功: {}", result);
+            }
+        });
+    }
+
+
 }

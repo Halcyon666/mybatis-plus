@@ -22,3 +22,27 @@ mybatis-plus:
     cache-enabled: false
     # Enable SQL logging (disable in production)
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+resilience4j:
+  retry:
+    instances:
+      remoteServiceRetry:
+        max-attempts: 3
+        wait-duration: 1000ms
+  circuitbreaker:
+    instances:
+      remoteServiceCB:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000ms
+        permitted-number-of-calls-in-half-open-state: 2
+  ratelimiter:
+    instances:
+      remoteServiceLimiter:
+        limit-for-period: 5
+        limit-refresh-period: 1s
+        timeout-duration: 500ms
+      testLimiter:
+        limit-for-period: 2    # 2次/周期
+        limit-refresh-period: 10s  # 10秒刷新一次额度
+        timeout-duration: 0ms  # 不等待直接拒绝
