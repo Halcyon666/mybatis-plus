@@ -46,3 +46,7 @@ resilience4j:
         limit-for-period: 2    # 2次/周期
         limit-refresh-period: 10s  # 10秒刷新一次额度
         timeout-duration: 0ms  # 不等待直接拒绝
+logging:
+  level:
+    com:
+      whalefall541: debug

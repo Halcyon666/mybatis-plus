@@ -27,8 +27,12 @@ public class FailFastAsyncExecutor implements AutoCloseable {
 
     private final ExecutorService executor;
 
-    public FailFastAsyncExecutor(int threadCount) {
-        this.executor = Executors.newFixedThreadPool(threadCount);
+    public FailFastAsyncExecutor(int threadCount, String jobName) {
+        this.executor = Executors.newFixedThreadPool(threadCount, r -> {
+            Thread thread = new Thread(r);
+            thread.setName(String.format("%s-%s", jobName, thread.getName()));
+            return thread;
+        });
     }
 
     /**
@@ -41,7 +45,9 @@ public class FailFastAsyncExecutor implements AutoCloseable {
      */
     public <P, R> CompletableFuture<List<R>> executeFailFast(List<P> inputs, Function<P, R> taskFunction) {
         List<CompletableFuture<R>> futures = inputs.stream()
-                .map(input -> CompletableFuture.supplyAsync(() -> taskFunction.apply(input), executor))
+                .map(input -> CompletableFuture.supplyAsync(
+                        // 异步线程（来自 thread pool）执行下面逻辑
+                        () -> taskFunction.apply(input), executor))
                 .collect(Collectors.toList());
         CompletableFuture<List<R>> resultFuture = new CompletableFuture<>();
         registerFailFastHandlers(futures, resultFuture);

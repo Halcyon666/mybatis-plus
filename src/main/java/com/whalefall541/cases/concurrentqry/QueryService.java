@@ -4,7 +4,6 @@ import com.whalefall541.cases.concurrentqry.v1.CodeQueryExecutor;
 import com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor;
 import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor;
 import com.whalefall541.cases.concurrentqry.v4.FailFastAsyncExecutorV7;
-import com.whalefall541.cases.concurrentqry.v4.InterruptibleTaskWrapper;
 import com.whalefall541.cases.concurrentqry.v5.FailFastAsyncExecutorV5;
 import com.whalefall541.cases.concurrentqry.v6.Resilience4jExecutor;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
@@ -20,13 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor.shutdown;
 
@@ -40,13 +39,9 @@ import static com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecuto
 @AllArgsConstructor
 @SuppressWarnings("all")
 public class QueryService {
-    static final List<String> LIST = Arrays.asList("JACK0",
-            "JACK1",
-            "JACK2",
-            "JACK3",
-            "JACK4",
-            "JACK5",
-            "JACK6");
+    private static List<String> LIST = IntStream.rangeClosed(0, 6)
+            .mapToObj(i -> "JACK" + i)
+            .collect(Collectors.toList());
     static final String LOG_PATTERN = "条数{}: List{}";
     private final SqlSessionFactory sqlSessionFactory;
     private CodeEntityServiceImpl codeEntityService;
@@ -78,8 +73,8 @@ public class QueryService {
 
     public void doCodeQuery() {
 
-//        codeQuery3();
-        codeQueryV7();
+        codeQuery3();
+//        codeQueryV7();
 
     }
 
@@ -123,7 +118,7 @@ public class QueryService {
     // real FailFast
     public void codeQuery3() {
         List<CodeEntityPO> poList = getPos();
-        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
+        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3, "fastF")) {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {
@@ -139,7 +134,7 @@ public class QueryService {
 
     public void codeQueryV7() {
         List<CodeEntityPO> poList = getPos();
-        try (FailFastAsyncExecutorV7 asyncTaskExecutor = new FailFastAsyncExecutorV7(3)) {
+        try (FailFastAsyncExecutorV7 asyncTaskExecutor = new FailFastAsyncExecutorV7(3, "qryV7")) {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {
@@ -153,33 +148,12 @@ public class QueryService {
         }
     }
 
-    // 响应中断
-    public void codeQuery4() {
-        // 如果你的 taskFunction 内部有循环或长耗时操作，最好把 checkInterrupted() 放在循环体里多次调用；
-        Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
-                .wrap(s -> codeEntityService.getById(s));
-
-        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
-            asyncTaskExecutor.executeFailFast(LIST, interruptibleTask)
-                    .handle((list, ex) -> {
-                        if (ex != null) {
-                            throw new RuntimeException(ex);
-                        }
-                        log.info(LOG_PATTERN, list.size(), list);
-                        return list;
-                    }).join();
-        }
-    }
-
     // 使用共享线程池
     public void queryCodesWithFailFast5() {
-        Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
-                .wrap(s -> codeEntityService.getById(s));
-
         FailFastAsyncExecutorV5 executor = new FailFastAsyncExecutorV5(globalExecutor);
         CompletableFuture<List<CodeEntityPO>> future = executor.executeFailFast(
                 LIST,
-                interruptibleTask
+                s -> codeEntityService.getById(s)
         );
 
         List<CodeEntityPO> results = future.join();
@@ -189,7 +163,7 @@ public class QueryService {
 
     public void codeQueryWithTransactional1() {
         List<CodeEntityPO> poList = getPos();
-        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
+        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3, "fastF")) {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getByIdMine(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {

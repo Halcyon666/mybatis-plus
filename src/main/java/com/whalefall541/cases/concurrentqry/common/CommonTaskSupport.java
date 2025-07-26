@@ -18,14 +18,19 @@ public class CommonTaskSupport {
     public static <R> void registerFailFastHandlers(List<CompletableFuture<R>> futures,
                                                     CompletableFuture<List<R>> resultFuture) {
         AtomicBoolean failFastTriggered = new AtomicBoolean(false);
-        futures.forEach(future -> future.whenComplete((r, ex) -> {
-            if (ex != null && failFastTriggered.compareAndSet(false, true)) {
-                Throwable actual = unwrap(ex);
-                logIfNeeded(actual);
-                resultFuture.completeExceptionally(actual);
-                futures.forEach(f -> f.cancel(true));
-            }
-        }));
+        futures.forEach(future -> future.whenComplete(
+                // 下面都是的异步线程完成后触发
+                (r, ex) -> {
+                    if (ex != null && failFastTriggered.compareAndSet(false, true)) {
+                        Throwable actual = unwrap(ex);
+                        logIfNeeded(actual);
+                        resultFuture.completeExceptionally(actual);
+                        futures.forEach(f -> {
+                            boolean cancelled = f.cancel(true);
+                            log.debug("尝试取消任务{}: {}", f, cancelled ? "成功" : "失败");
+                        });
+                    }
+                }));
     }
 
     private static Throwable unwrap(Throwable ex) {
