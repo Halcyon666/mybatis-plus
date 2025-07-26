@@ -1,5 +1,8 @@
 package com.whalefall541.cases.concurrentqry.v4;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.CancellationException;
 import java.util.function.Function;
 
 /**
@@ -15,6 +18,7 @@ import java.util.function.Function;
  * <p>
  * 你使用线程池，并希望任务不要“无谓抢线程”的时候。
  */
+@Slf4j
 public class InterruptibleTaskWrapper {
 
     private InterruptibleTaskWrapper() {
@@ -44,10 +48,10 @@ public class InterruptibleTaskWrapper {
         };
     }
 
-    @SuppressWarnings("all")
     private static void checkInterrupted() {
         if (Thread.currentThread().isInterrupted()) {
-            throw new RuntimeException(new InterruptedException("任务被取消：线程中断"));
+            log.debug("任务执行后检测到中断，结果作废");
+            throw new CancellationException("Task was interrupted after execution");
         }
     }
 }

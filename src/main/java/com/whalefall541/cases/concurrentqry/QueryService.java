@@ -3,6 +3,7 @@ package com.whalefall541.cases.concurrentqry;
 import com.whalefall541.cases.concurrentqry.v1.CodeQueryExecutor;
 import com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor;
 import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor;
+import com.whalefall541.cases.concurrentqry.v4.FailFastAsyncExecutorV7;
 import com.whalefall541.cases.concurrentqry.v4.InterruptibleTaskWrapper;
 import com.whalefall541.cases.concurrentqry.v5.FailFastAsyncExecutorV5;
 import com.whalefall541.cases.concurrentqry.v6.Resilience4jExecutor;
@@ -13,6 +14,8 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -21,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -45,7 +47,7 @@ public class QueryService {
             "JACK4",
             "JACK5",
             "JACK6");
-    static final String LOG_PATTERN = "{}: {}";
+    static final String LOG_PATTERN = "条数{}: List{}";
     private final SqlSessionFactory sqlSessionFactory;
     private CodeEntityServiceImpl codeEntityService;
     private final Executor globalExecutor;
@@ -68,18 +70,17 @@ public class QueryService {
                 }).collect(Collectors.toList());
     }
 
-//    @Bean
-//    public CommandLineRunner commandLineRunner() {
-//        return args -> doCodeQuery();
-//    }
+    @Bean
+    public CommandLineRunner commandLineRunner() {
+        return args -> doCodeQuery();
+    }
 
 
     public void doCodeQuery() {
-        try {
-            resilience4jCall();
-        } catch (Exception e) {
-            log.error("并发查询code失败", e);
-        }
+
+//        codeQuery3();
+        codeQueryV7();
+
     }
 
     public void codeQuery1() {
@@ -91,7 +92,7 @@ public class QueryService {
             queryExecutor.queryUsersAsync(userMap)
                     .handle((resultMap, ex) -> {
                         if (ex != null) {
-                            throw new CompletionException(ex);
+                            throw new RuntimeException(ex);
                         }
                         resultMap.forEach((id, user) -> log.info(LOG_PATTERN, id, user));
                         return resultMap;
@@ -111,7 +112,7 @@ public class QueryService {
             asyncTaskExecutor.executeAsyncTasks(poList, po -> codeEntityService.getById(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {
-                            throw new CompletionException(ex);
+                            throw new RuntimeException(ex);
                         }
                         log.info(LOG_PATTERN, list.size(), list);
                         return list;
@@ -126,14 +127,31 @@ public class QueryService {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {
-                            throw new CompletionException(ex);
+                            throw new RuntimeException(ex);
                         }
                         log.info(LOG_PATTERN, list.size(), list);
                         return list;
                     }).join();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
+    public void codeQueryV7() {
+        List<CodeEntityPO> poList = getPos();
+        try (FailFastAsyncExecutorV7 asyncTaskExecutor = new FailFastAsyncExecutorV7(3)) {
+            asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
+                    .handle((list, ex) -> {
+                        if (ex != null) {
+                            throw new RuntimeException(ex);
+                        }
+                        log.info(LOG_PATTERN, list.size(), list);
+                        return list;
+                    }).join();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
     // 响应中断
     public void codeQuery4() {
@@ -145,7 +163,7 @@ public class QueryService {
             asyncTaskExecutor.executeFailFast(LIST, interruptibleTask)
                     .handle((list, ex) -> {
                         if (ex != null) {
-                            throw new CompletionException(ex);
+                            throw new RuntimeException(ex);
                         }
                         log.info(LOG_PATTERN, list.size(), list);
                         return list;
@@ -175,7 +193,7 @@ public class QueryService {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getByIdMine(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {
-                            throw new CompletionException(ex);
+                            throw new RuntimeException(ex);
                         }
                         log.info(LOG_PATTERN, list.size(), list);
                         return list;

@@ -3,7 +3,6 @@ package com.whalefall541.cases.resilience4j;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.IntStream;
@@ -15,9 +14,10 @@ import java.util.stream.IntStream;
 @Service
 @AllArgsConstructor
 @Slf4j
+@SuppressWarnings("unused")
 public class CallService {
     private final ResilienceService resilienceService;
-    @Bean
+//    @Bean
     public CommandLineRunner commandLineRunnerResilience() {
         return args -> IntStream.range(0, 3)
                 .mapToObj(i -> resilienceService.process("testLimiter"))
