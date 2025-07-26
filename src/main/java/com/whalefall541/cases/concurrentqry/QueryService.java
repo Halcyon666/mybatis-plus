@@ -13,8 +13,6 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -38,6 +36,7 @@ import static com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecuto
 @Slf4j
 @Service
 @AllArgsConstructor
+@SuppressWarnings("all")
 public class QueryService {
     static final List<String> LIST = Arrays.asList("JACK0",
             "JACK1",
@@ -69,10 +68,11 @@ public class QueryService {
                 }).collect(Collectors.toList());
     }
 
-    @Bean
-    public CommandLineRunner commandLineRunner() {
-        return args -> doCodeQuery();
-    }
+//    @Bean
+//    public CommandLineRunner commandLineRunner() {
+//        return args -> doCodeQuery();
+//    }
+
 
     public void doCodeQuery() {
         try {
@@ -82,7 +82,6 @@ public class QueryService {
         }
     }
 
-    @SuppressWarnings("unused")
     public void codeQuery1() {
         CodeQueryExecutor queryExecutor = new CodeQueryExecutor(sqlSessionFactory, 3);
 
@@ -106,7 +105,6 @@ public class QueryService {
         }
     }
 
-    @SuppressWarnings("unused")
     public void codeQuery2() {
         List<CodeEntityPO> poList = getPos();
         try (LogicalFailFastTaskExecutor asyncTaskExecutor = new LogicalFailFastTaskExecutor(3)) {
@@ -122,7 +120,6 @@ public class QueryService {
     }
 
     // real FailFast
-    @SuppressWarnings("unused")
     public void codeQuery3() {
         List<CodeEntityPO> poList = getPos();
         try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
@@ -139,7 +136,6 @@ public class QueryService {
 
 
     // 响应中断
-    @SuppressWarnings("unused")
     public void codeQuery4() {
         // 如果你的 taskFunction 内部有循环或长耗时操作，最好把 checkInterrupted() 放在循环体里多次调用；
         Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
@@ -158,7 +154,6 @@ public class QueryService {
     }
 
     // 使用共享线程池
-    @SuppressWarnings("unused")
     public void queryCodesWithFailFast5() {
         Function<String, CodeEntityPO> interruptibleTask = InterruptibleTaskWrapper
                 .wrap(s -> codeEntityService.getById(s));
@@ -174,7 +169,6 @@ public class QueryService {
     }
 
 
-    @SuppressWarnings("unused")
     public void codeQueryWithTransactional1() {
         List<CodeEntityPO> poList = getPos();
         try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3)) {
@@ -191,7 +185,6 @@ public class QueryService {
 
     private final PlatformTransactionManager transactionManager;
 
-    @SuppressWarnings("unused")
     public void codeQueryWithTransactional2() {
         TransactionTemplate template = new TransactionTemplate(transactionManager);
         FailFastAsyncExecutorV5 executor = new FailFastAsyncExecutorV5(globalExecutor);
@@ -209,7 +202,6 @@ public class QueryService {
     private final Resilience4jExecutor resilience4jExecutor;
 
     // 正常版本
-    @SuppressWarnings("all")
     public void resilience4jCall() {
         resilience4jExecutor.execute(LIST,
                 id -> codeEntityService.getById(id),
@@ -231,7 +223,6 @@ public class QueryService {
     }
 
     // 限流拒绝
-    @SuppressWarnings("all")
     public void resilience4jCallRequestNotPermitted() {
 
         resilience4jExecutor.execute(
