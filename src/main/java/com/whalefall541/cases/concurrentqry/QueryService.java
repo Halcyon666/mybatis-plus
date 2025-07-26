@@ -4,7 +4,7 @@ import com.whalefall541.cases.concurrentqry.jobversion.JobFailFastAsyncExecutor;
 import com.whalefall541.cases.concurrentqry.v1.CodeQueryExecutor;
 import com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor;
 import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor;
-import com.whalefall541.cases.concurrentqry.v4.FailFastAsyncExecutorV7;
+import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutorV7;
 import com.whalefall541.cases.concurrentqry.v5.FailFastAsyncExecutorV5;
 import com.whalefall541.cases.concurrentqry.v6.Resilience4jExecutor;
 import com.whalefall541.mybatisplus.samples.generator.system.po.CodeEntityPO;
@@ -119,7 +119,7 @@ public class QueryService {
     // real FailFast
     public void codeQuery3() {
         List<CodeEntityPO> poList = getPos();
-        try (JobFailFastAsyncExecutor asyncTaskExecutor = new JobFailFastAsyncExecutor(3, "fastF")) {
+        try (JobFailFastAsyncExecutor asyncTaskExecutor = new JobFailFastAsyncExecutor(3, "F")) {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {

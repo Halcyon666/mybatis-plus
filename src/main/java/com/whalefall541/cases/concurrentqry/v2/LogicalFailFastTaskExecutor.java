@@ -1,6 +1,6 @@
 package com.whalefall541.cases.concurrentqry.v2;
 
-import com.whalefall541.cases.concurrentqry.common.CommonTaskSupport;
+import com.whalefall541.cases.concurrentqry.v3.CommonTaskSupport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,4 +1,4 @@
-package com.whalefall541.cases.concurrentqry.common;
+package com.whalefall541.cases.concurrentqry.v3;
 
 import lombok.extern.slf4j.Slf4j;
 

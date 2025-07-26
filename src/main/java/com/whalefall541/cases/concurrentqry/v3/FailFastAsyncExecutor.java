@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.whalefall541.cases.concurrentqry.common.CommonTaskSupport.collectAllResults;
-import static com.whalefall541.cases.concurrentqry.common.CommonTaskSupport.registerFailFastHandlers;
+import static com.whalefall541.cases.concurrentqry.v3.CommonTaskSupport.collectAllResults;
+import static com.whalefall541.cases.concurrentqry.v3.CommonTaskSupport.registerFailFastHandlers;
 import static com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor.shutdown;
 
 /**

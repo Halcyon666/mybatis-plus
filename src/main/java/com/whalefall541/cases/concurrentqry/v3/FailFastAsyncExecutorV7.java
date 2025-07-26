@@ -1,6 +1,5 @@
-package com.whalefall541.cases.concurrentqry.v4;
+package com.whalefall541.cases.concurrentqry.v3;
 
-import com.whalefall541.cases.concurrentqry.common.CommonTaskSupport;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -8,8 +7,8 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.whalefall541.cases.concurrentqry.common.CommonTaskSupport.collectAllResults;
-import static com.whalefall541.cases.concurrentqry.common.CommonTaskSupport.registerFailFastHandlers;
+import static com.whalefall541.cases.concurrentqry.v3.CommonTaskSupport.collectAllResults;
+import static com.whalefall541.cases.concurrentqry.v3.CommonTaskSupport.registerFailFastHandlers;
 
 /**
  * @see com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor
