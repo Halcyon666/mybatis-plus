@@ -1,5 +1,6 @@
 package com.whalefall541.cases.concurrentqry;
 
+import com.whalefall541.cases.concurrentqry.jobversion.JobFailFastAsyncExecutor;
 import com.whalefall541.cases.concurrentqry.v1.CodeQueryExecutor;
 import com.whalefall541.cases.concurrentqry.v2.LogicalFailFastTaskExecutor;
 import com.whalefall541.cases.concurrentqry.v3.FailFastAsyncExecutor;
@@ -118,7 +119,7 @@ public class QueryService {
     // real FailFast
     public void codeQuery3() {
         List<CodeEntityPO> poList = getPos();
-        try (FailFastAsyncExecutor asyncTaskExecutor = new FailFastAsyncExecutor(3, "fastF")) {
+        try (JobFailFastAsyncExecutor asyncTaskExecutor = new JobFailFastAsyncExecutor(3, "fastF")) {
             asyncTaskExecutor.executeFailFast(poList, po -> codeEntityService.getById(po.getUsername()))
                     .handle((list, ex) -> {
                         if (ex != null) {
