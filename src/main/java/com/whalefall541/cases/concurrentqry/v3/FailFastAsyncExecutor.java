@@ -43,11 +43,9 @@ public class FailFastAsyncExecutor implements AutoCloseable {
         List<CompletableFuture<R>> futures = inputs.stream()
                 .map(input -> CompletableFuture.supplyAsync(() -> taskFunction.apply(input), executor))
                 .collect(Collectors.toList());
-
         CompletableFuture<List<R>> resultFuture = new CompletableFuture<>();
         registerFailFastHandlers(futures, resultFuture);
         collectAllResults(futures, resultFuture);
-
         return resultFuture;
     }
 

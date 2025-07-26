@@ -1,5 +1,6 @@
 package com.whalefall541.cases.concurrentqry.v4;
 
+import com.whalefall541.cases.concurrentqry.common.CommonTaskSupport;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -67,27 +68,10 @@ public class FailFastAsyncExecutorV7 implements AutoCloseable {
         }, executor);
     }
 
-    public static Throwable unwrap(Throwable ex) {
-        if (ex instanceof CompletionException || ex instanceof ExecutionException) {
-            return ex.getCause();
-        }
-        return ex;
-    }
 
-    public static void shutdown(ExecutorService executor) {
-        executor.shutdown();
-        try {
-            if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
-                executor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executor.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-    }
 
     @Override
     public void close() {
-        shutdown(executor);
+        CommonTaskSupport.shutdown(executor);
     }
 }

@@ -1,12 +1,15 @@
 package com.whalefall541.cases.concurrentqry.v2;
 
-import com.whalefall541.cases.concurrentqry.v4.FailFastAsyncExecutorV7;
+import com.whalefall541.cases.concurrentqry.common.CommonTaskSupport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,7 +28,7 @@ public class LogicalFailFastTaskExecutor implements AutoCloseable {
     }
 
     public static void shutdown(ExecutorService executor) {
-        FailFastAsyncExecutorV7.shutdown(executor);
+        CommonTaskSupport.shutdown(executor);
     }
 
     /**

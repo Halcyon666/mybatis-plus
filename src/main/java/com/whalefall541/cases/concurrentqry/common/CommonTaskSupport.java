@@ -3,13 +3,9 @@ package com.whalefall541.cases.concurrentqry.common;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
-import static com.whalefall541.cases.concurrentqry.v4.FailFastAsyncExecutorV7.unwrap;
 
 /**
  * @author Halcyon
@@ -30,6 +26,25 @@ public class CommonTaskSupport {
                 futures.forEach(f -> f.cancel(true));
             }
         }));
+    }
+
+    private static Throwable unwrap(Throwable ex) {
+        if (ex instanceof CompletionException || ex instanceof ExecutionException) {
+            return ex.getCause();
+        }
+        return ex;
+    }
+
+    public static void shutdown(ExecutorService executor) {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static void logIfNeeded(Throwable actual) {
